@@ -44,7 +44,7 @@ class _TodoPageState extends State<TodoPage> {
   final List<Task> _tasks = [
     Task(title: 'Разобраться с Flutter'),
     Task(title: 'Сделать первое приложение'),
-    Task(title: 'Запустить на телефоне'),
+    Task(title: 'Запустить на эмуляторе'),
   ];
 
   void _addTask() {
@@ -58,6 +58,13 @@ class _TodoPageState extends State<TodoPage> {
       _tasks.add(Task(title: text));
       _controller.clear();
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Задача добавлена'),
+        duration: Duration(seconds: 1),
+      ),
+    );
   }
 
   void _toggleTask(int index) {
@@ -67,13 +74,37 @@ class _TodoPageState extends State<TodoPage> {
   }
 
   void _deleteTask(int index) {
+    final deletedTaskTitle = _tasks[index].title;
+
     setState(() {
       _tasks.removeAt(index);
     });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Задача "$deletedTaskTitle" удалена'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
   }
 
   int get _completedCount {
     return _tasks.where((task) => task.isDone).length;
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _openAboutPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AboutPage(),
+      ),
+    );
   }
 
   @override
@@ -82,6 +113,13 @@ class _TodoPageState extends State<TodoPage> {
       appBar: AppBar(
         title: const Text('Мои задачи'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: _openAboutPage,
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'О приложении',
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -147,13 +185,92 @@ class _TodoPageState extends State<TodoPage> {
                               ),
                             ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete),
+                              icon: const Icon(Icons.delete_outline),
                               onPressed: () => _deleteTask(index),
                             ),
                           ),
                         );
                       },
                     ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AboutPage extends StatelessWidget {
+  const AboutPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('О приложении'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(
+              Icons.task_alt,
+              size: 64,
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'Мой первый Flutter-проект',
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            const Text(
+              'Это учебное приложение для изучения Flutter. '
+              'Здесь можно добавлять задачи, отмечать их выполненными '
+              'и удалять из списка.',
+              style: TextStyle(
+                fontSize: 16,
+                height: 1.4,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              'Что уже используется:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            const Text('• StatelessWidget'),
+            const Text('• StatefulWidget'),
+            const Text('• setState'),
+            const Text('• ListView.builder'),
+            const Text('• Navigator'),
+            const Text('• SnackBar'),
+
+            const Spacer(),
+
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Вернуться назад'),
+              ),
             ),
           ],
         ),
